@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบประเมินความปวด - สำหรับผู้ป่วย</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/b3bf9e8ac58e6ad6.data_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#16324f; }
+    body { margin:0; font-family:"DM Sans",sans-serif; color:var(--ink); background:#f8fafc; }
+    .score-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+    .score-btn { min-height:160px; overflow:hidden; text-align:center; transition:transform .18s ease, box-shadow .18s ease; }
+    .score-btn:hover { transform:translateY(-4px); box-shadow:0 14px 24px rgba(22,50,79,.18); }
+    .score-btn:disabled { cursor:wait; opacity:.72; transform:none; }
+    .emoji-face { display:block; padding-top:0.75rem; font-size:4.8rem; line-height:1; }
+    .score-body { display:flex; min-height:60px; align-items:center; gap:.5rem; padding:.5rem; text-align:left; }
+    .score-number { display:flex; width:2rem; height:2rem; flex:0 0 auto; align-items:center; justify-content:center; border-radius:999px; background:rgba(255,255,255,.8); font-weight:700; }
+    .score-copy { font-size:.8rem; font-weight:700; }
+    .view-enter { animation:viewEnter .35s ease both; }
+    @keyframes viewEnter { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .waiting-emoji { font-size:7rem; line-height:1; }
+    .nurse-walk { animation:walkAcross 3s ease-in-out infinite alternate; }
+    @keyframes walkAcross { from { transform:translateX(-15px); } to { transform:translateX(15px); } }
+    @media (min-width:640px) { .score-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+    @media (min-width:1024px) { .score-grid { grid-template-columns:repeat(6,minmax(0,1fr)); } }
+  </style>
+</head>
+<body>
+  <div class="w-full min-h-screen">
+    <header class="border-b border-sky-100 bg-white px-5 py-4 sm:px-8">
+      <div class="mx-auto flex max-w-6xl items-center gap-3">
+        <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-100 text-sky-800">
+          <i data-lucide="heart-pulse" class="h-6 w-6"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold">ระบบประเมินระดับความปวด</h1>
+          <p class="text-sm text-slate-500">สำหรับผู้ป่วยกดแจ้งพยาบาล</p>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto w-full max-w-6xl px-5 py-8 sm:px-8">
+      <!-- หน้ากดเลือกระดับความปวด -->
+      <section id="patient-view" class="view-enter">
+        <div class="mx-auto max-w-4xl text-center">
+          <span class="mb-3 inline-flex rounded-full bg-sky-100 px-4 py-1.5 text-sm font-semibold text-sky-800">การประเมินตนเอง</span>
+          <h2 class="text-2xl font-bold sm:text-3xl">ตอนนี้คุณรู้สึกปวดระดับใด?</h2>
+          <p class="mx-auto mt-2 max-w-2xl text-slate-600">กดเลือกหมายเลขหรือใบวันที่ตรงกับอาการของคุณที่สุด เพื่อส่งสัญญาณแจ้งเตือนไปยังเคาน์เตอร์พยาบาล</p>
+        </div>
+
+        <div class="mx-auto mt-8 max-w-6xl rounded-[2rem] bg-white p-4 shadow-sm sm:p-6">
+          <div class="score-grid" id="score-buttons-container">
+            <!-- ปุ่มระดับความปวด 0 - 10 -->
+            <button type="button" data-score="0" class="score-btn rounded-2xl bg-emerald-50 text-emerald-900 border border-emerald-200">
+              <span class="emoji-face">😊</span>
+              <span class="score-body"><span class="score-number">0</span><span class="score-copy">ไม่ปวดเลย</span></span>
+            </button>
+            <button type="button" data-score="1" class="score-btn rounded-2xl bg-emerald-50 text-emerald-900 border border-emerald-200">
+              <span class="emoji-face">🙂</span>
+              <span class="score-body"><span class="score-number">1</span><span class="score-copy">ปวดเล็กน้อย</span></span>
+            </button>
+            <button type="button" data-score="2" class="score-btn rounded-2xl bg-emerald-50 text-emerald-900 border border-emerald-200">
+              <span class="emoji-face">🙂</span>
+              <span class="score-body"><span class="score-number">2</span><span class="score-copy">ปวดนิดหน่อย</span></span>
+            </button>
+            <button type="button" data-score="3" class="score-btn rounded-2xl bg-amber-50 text-amber-900 border border-amber-200">
+              <span class="emoji-face">😐</span>
+              <span class="score-body"><span class="score-number">3</span><span class="score-copy">ปวดปานกลาง</span></span>
+            </button>
+            <button type="button" data-score="4" class="score-btn rounded-2xl bg-amber-50 text-amber-900 border border-amber-200">
+              <span class="emoji-face">😐</span>
+              <span class="score-body"><span class="score-number">4</span><span class="score-copy">เริ่มปวดมาก</span></span>
+            </button>
+            <button type="button" data-score="5" class="score-btn rounded-2xl bg-amber-50 text-amber-900 border border-amber-200">
+              <span class="emoji-face">🙁</span>
+              <span class="score-body"><span class="score-number">5</span><span class="score-copy">ปวดจนรบกวนสมาธิ</span></span>
+            </button>
+            <button type="button" data-score="6" class="score-btn rounded-2xl bg-orange-50 text-orange-900 border border-orange-200">
+              <span class="emoji-face">😣</span>
+              <span class="score-body"><span class="score-number">6</span><span class="score-copy">ปวดมาก</span></span>
+            </button>
+            <button type="button" data-score="7" class="score-btn rounded-2xl bg-rose-50 text-rose-900 border border-rose-200">
+              <span class="emoji-face">😰</span>
+              <span class="score-body"><span class="score-number">7</span><span class="score-copy">ปวดรุนแรง</span></span>
+            </button>
+            <button type="button" data-score="8" class="score-btn rounded-2xl bg-rose-50 text-rose-900 border border-rose-200">
+              <span class="emoji-face">😭</span>
+              <span class="score-body"><span class="score-number">8</span><span class="score-copy">ปวดรุนแรงมาก</span></span>
+            </button>
+            <button type="button" data-score="9" class="score-btn rounded-2xl bg-rose-100 text-rose-950 border border-rose-300">
+              <span class="emoji-face">😱</span>
+              <span class="score-body"><span class="score-number">9</span><span class="score-copy">ปวดจนทนแทบไม่ไหว</span></span>
+            </button>
+            <button type="button" data-score="10" class="score-btn rounded-2xl bg-rose-200 text-rose-950 border border-rose-400">
+              <span class="emoji-face">😫</span>
+              <span class="score-body"><span class="score-number">10</span><span class="score-copy">ปวดที่สุดในชีวิต</span></span>
+            </button>
+          </div>
+        </div>
+        <p id="patient-message" class="mt-6 text-center font-medium text-rose-700" aria-live="polite"></p>
+      </section>
+
+      <!-- หน้าแสดงสถานะเมื่อกดส่งข้อมูลแล้ว -->
+      <section id="waiting-view" class="hidden view-enter">
+        <div class="mx-auto max-w-2xl rounded-[2.5rem] bg-white p-8 text-center shadow-lg sm:p-12">
+          <div id="waiting-score" class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-sky-100 text-4xl font-bold text-sky-900 shadow-inner">0</div>
+          <h2 class="mt-6 text-2xl font-bold">ส่งสัญญาณแจ้งพยาบาลเรียบร้อยแล้ว</h2>
+          <p class="mx-auto mt-2 text-slate-600">กรุณานอนพักผ่อน พยาบาลได้รับข้อมูลระดับความปวดของคุณแล้ว และกำลังเดินทางมาดูแล</p>
+          <div class="mt-8 flex items-center justify-center gap-3 text-sky-800">
+            <i data-lucide="stethoscope" class="nurse-walk h-12 w-12"></i>
+            <i data-lucide="arrow-right" class="h-6 w-6"></i>
+          </div>
+          <button id="return-button" type="button" class="mt-8 rounded-2xl bg-sky-800 px-6 py-3 font-semibold text-white hover:bg-sky-900">
+            ประเมินความปวดใหม่อีกครั้ง
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    let recordsCount = 0;
+    const patientView = document.getElementById("patient-view");
+    const waitingView = document.getElementById("waiting-view");
+
+    function showPatient() {
+      patientView.classList.remove("hidden");
+      waitingView.classList.add("hidden");
+    }
+
+    function showWaiting(score) {
+      patientView.classList.add("hidden");
+      waitingView.classList.remove("hidden");
+      document.getElementById("waiting-score").textContent = score;
+    }
+
+    async function submitPain(score, button) {
+      if (recordsCount >= 999) {
+        document.getElementById("patient-message").textContent = "ไม่สามารถบันทึกเพิ่มเติมได้ กรุณาแจ้งพยาบาลโดยตรง";
+        return;
+      }
+
+      button.disabled = true;
+      document.getElementById("patient-message").textContent = "";
+
+      const result = await window.dataSdk.create({
+        pain_score: score,
+        pain_level: "คะแนน " + score,
+        timestamp: new Date().toISOString(),
+        nurse_response_time: -1
+      });
+
+      button.disabled = false;
+      if (result.isOk) {
+        showWaiting(score);
+      } else {
+        document.getElementById("patient-message").textContent = "ไม่สามารถส่งการแจ้งเตือนได้ กรุณาลองอีกครั้งหรือแจ้งพยาบาลโดยตรง";
+      }
+    }
+
+    document.querySelectorAll("[data-score]").forEach(button => {
+      button.addEventListener("click", () => submitPain(Number(button.dataset.score), button));
+    });
+
+    document.getElementById("return-button").addEventListener("click", showPatient);
+
+    const dataHandler = {
+      onDataChanged(data) {
+        recordsCount = data.length;
+      }
+    };
+
+    async function initialize() {
+      const result = await window.dataSdk.init(dataHandler);
+      if (!result.isOk) {
+        document.getElementById("patient-message").textContent = "ระบบบันทึกข้อมูลยังไม่พร้อม กรุณาแจ้งพยาบาลโดยตรง";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      initialize();
+    });
+  </script>
+</body>
+</html>
